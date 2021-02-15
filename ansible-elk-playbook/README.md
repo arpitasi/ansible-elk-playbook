@@ -7,14 +7,11 @@ This playbook is for setting up Elastic Search along with logstash and kibana (E
 
  - The playbook was built and tested on AWS ec2 instance based on Ubuntu  AMI
  - You will need Ansible installed and running
- - Playbook is currently configured to set up the ELK stack together with Metricbeat for server perf monitoring.
+ - Playbook is currently configured to set up the ELK stack together with Metricbeat for server performance monitoring.
 
  ## Instructions
 
- 1. Edit your Ansible hosts file ('/etc/ansible/hosts') and add an 'hosts' entry for the server you wish to install ELK on
- 2. Verify connectivity to the ELK server, ssh connectivity must be working.
- 3. In the terminal on the machine hosting Ansible, clone this repo.
- 4. Cd into the directory, and run:
- `ansible-playbook main.yml`
+Please run ansible-playbook -i /opt/ansible/inventory/aws_ec2.yaml main.yml -vvvv --ask-vault-pass
+Password for vault : awssecret
 
- The plays in the playbook will run on the target server, installing ELK and the specified hosts.
+ The plays in the playbook will run on the Ansible Controller on target host set in dynamic inventory server, installing ELK and the specified hosts.
