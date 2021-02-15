@@ -1,0 +1,48 @@
+
+---
+- name: Launch the new EC2 Instance
+  ec2:
+    instance_type: t2.xlarge
+    instance_tags:
+      name: ES_Node
+      os: ubuntu
+    group: launch-wizard-2
+    count: 3
+    key_name: awskeypair
+    image: ami-073c8c0760395aab8
+    region: ap-south-1
+    vpc_subnet_id: subnet-38b1f874
+    wait: yes
+    assign_public_ip: yes
+  register: ec2
+
+- name : Add instance to host group
+  add_host:
+    hostname: "{{ item.public_ip }}"
+    groupname: node
+  loop: "{{ ec2.instances }}"
+
+- name: Wait for SSH to come up
+  local_action:
+    module: wait_for
+    host: "{{ item.public_ip }}"
+    port: 22
+    delay: 10
+    timeout: 120
+  loop: "{{ ec2.instances }}"
+
+- name: Breathing room (Ansible uses python apt, has issues running directly after boot)
+  pause: seconds=15
+
+- name: Register public key
+  shell: "cat ~/.ssh/id_rsa.pub"
+  register: pubkey
+
+- name: Place pub key in authorized keys file
+  shell: ssh -o StrictHostKeyChecking=no -i ~/awskeypair.pem ubuntu@{{ item.public_ip }} "echo {{ pubkey.stdout }} >> ~/.ssh/authorized_keys; sudo cp ~/.ssh/authorized_keys /root/.ssh/"
+  loop: "{{ ec2.instances }}"
+
+  #- name: Place pub key in authorized keys file
+  #  shell: "cat /tmp/remote-id_rsa.pub >> ~/.ssh/authorized_keys"
+  # register: addtoauth
+

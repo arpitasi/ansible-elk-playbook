@@ -1,11 +1,19 @@
 ---
 #
-# Playbook to install the ELK stack + Beats
+# Playbook to install the ELK stack + Beats (for server performance)
 #
-- hosts: node
-  remote_user: ubuntu
+- hosts: localhost
+  remote_user: root
   become: yes
-  become_user: ubuntu
+  become_user: root
+  vars_files:
+    - secrets.yml
+  roles:
+  - { role: ec2-dyn-inventory }
+- hosts: node
+  remote_user: root
+  become: yes
+  become_user: root
   roles:
   - { role: java }
   - { role: elasticsearch }
